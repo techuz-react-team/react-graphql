@@ -1,13 +1,5 @@
-import { gql, useQuery } from "@apollo/client";
-
-const GET_PROFILE = gql`
-  query getProfile {
-    viewer {
-      login
-      email
-    }
-  }
-`;
+import { useQuery } from "@apollo/client";
+import {GET_PROFILE} from '../queries/queries';
 
 const Profile = () => {
   const { loading, error, data } = useQuery(GET_PROFILE);

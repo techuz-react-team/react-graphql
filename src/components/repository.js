@@ -1,21 +1,7 @@
 import React from "react";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
+import {GET_REPOSITORIES} from '../queries/queries'
 
-const GET_REPOSITORIES = gql`
-  query getRepositories {
-    viewer {
-      repositories(first: 100) {
-        totalCount
-        nodes {
-          name
-          # owner {
-          #   login
-          # }
-        }
-      }
-    }
-  }
-`;
 
 const Repository = () => {
   const { loading, error, data } = useQuery(GET_REPOSITORIES);

@@ -1,41 +1,21 @@
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import React from "react";
-
-const CREATE_REPO = gql`
-  mutation createRepo($name: String!, $visibility: RepositoryVisibility!) {
-    createRepository(input: { name: $name, visibility: $visibility }) {
-      clientMutationId
-      repository {
-        id
-        nameWithOwner
-      }
-    }
-  }
-`;
-
-const GET_REPOSITORIES = gql`
-  query getRepositories {
-    viewer {
-      repositories(first: 100) {
-        totalCount
-        nodes {
-          name
-        }
-      }
-    }
-  }
-`;
+import { CREATE_REPO, GET_REPOSITORIES } from '../queries/queries'
 
 const CreateNewRepo = () => {
   const [inputs, setInputs] = React.useState({ name: "", visibility: "" });
 
   const [createRepo, { loading, error }] = useMutation(CREATE_REPO, {
-    onCompleted: (data) => console.log("Data from mutation", data),
+    onCompleted: (data) => alert("Repo Created Successfully", data),
     onError: (error) => console.error("Error creating a post", error),
   });
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error!</div>;
+  if (loading) {
+    return "Loading...";
+  }
+  if (error) {
+    return `Error! ${error.message}`;
+  }
 
   const handleInputChange = (event) => {
     event.persist();
