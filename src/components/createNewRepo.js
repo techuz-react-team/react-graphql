@@ -2,18 +2,32 @@ import { gql, useMutation } from "@apollo/client";
 import React from "react";
 
 const CREATE_REPO = gql`
-  mutation CreateRepository($name: String!, $visibility: String!) {
+  mutation createRepo($name: String!, $visibility: RepositoryVisibility!) {
     createRepository(input: { name: $name, visibility: $visibility }) {
+      clientMutationId
       repository {
-        name
-        # description
+        id
+        nameWithOwner
       }
     }
   }
 `;
 
-function CreateNewRepo() {
-  const [inputs, setInputs] = React.useState({});
+const GET_REPOSITORIES = gql`
+  query getRepositories {
+    viewer {
+      repositories(first: 100) {
+        totalCount
+        nodes {
+          name
+        }
+      }
+    }
+  }
+`;
+
+const CreateNewRepo = () => {
+  const [inputs, setInputs] = React.useState({ name: "", visibility: "" });
 
   const [createRepo, { loading, error }] = useMutation(CREATE_REPO, {
     onCompleted: (data) => console.log("Data from mutation", data),
@@ -24,7 +38,6 @@ function CreateNewRepo() {
   if (error) return <div>Error!</div>;
 
   const handleInputChange = (event) => {
-    console.log(event.target.value);
     event.persist();
     setInputs((inputs) => ({
       ...inputs,
@@ -34,15 +47,15 @@ function CreateNewRepo() {
 
   function handleCreateRepo(event) {
     event.preventDefault();
-    console.log(inputs);
-    // the mutate function also doesn't return a promise
     createRepo({
       variables: {
-        name: inputs.repoName,
-        description: inputs.description,
-        // visibility: inputs.visibility,
+        name: inputs.name,
+        // description: inputs.description,
+        visibility: inputs.visibility,
       },
+      refetchQueries: [{ query: GET_REPOSITORIES }],
     });
+    setInputs('')
   }
 
   return (
@@ -55,7 +68,7 @@ function CreateNewRepo() {
             type="text"
             name="name"
             onChange={handleInputChange}
-            value={inputs.repoName}
+            value={inputs.name}
           ></input>
         </div>
         {/* <div className="form-group col-6">
@@ -67,11 +80,11 @@ function CreateNewRepo() {
             onChange={handleInputChange}
             value={inputs.description}
           ></textarea>
-        </div> */}
+        </div>*/}
         <div className="form-group col-6">
           <label>Visibility:</label>
           <select
-          className="form-control"
+            className="form-control"
             name="visibility"
             onChange={handleInputChange}
             value={inputs.visibility}
