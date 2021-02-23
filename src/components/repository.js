@@ -1,12 +1,16 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
-import {GET_REPOSITORIES} from '../queries/queries'
-
+import { GET_REPOSITORIES } from "../queries/queries";
 
 const Repository = () => {
   const { loading, error, data } = useQuery(GET_REPOSITORIES);
-  const allRepo = data?.viewer?.repositories?.nodes;
-  
+  const repoList = data?.viewer?.repositories?.nodes;
+
+  const renderRepoList = React.useMemo(() => {
+    return repoList
+  }, [repoList])
+
+
   if (loading) {
     return "Loading...";
   }
@@ -17,8 +21,8 @@ const Repository = () => {
     <div className="footer">
       <h3>All Repositories</h3>
       <ul>
-        {allRepo.map((repo) => {
-          return <li key={repo.name}>{repo.name}</li>;
+        {renderRepoList.map((repo, index) => {
+          return <li key={index}>{repo.name}</li>;
         })}
       </ul>
     </div>

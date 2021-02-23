@@ -1,8 +1,20 @@
 import { useMutation } from "@apollo/client";
 import React from "react";
-import { CREATE_REPO, GET_REPOSITORIES } from '../queries/queries'
+import { CREATE_REPO, GET_REPOSITORIES } from "../queries/queries";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 
 const CreateNewRepo = () => {
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Repository name is required"),
+    visibility: Yup.string().required("Visibility is required"),
+  });
+
+  const { register, handleSubmit, errors } = useForm({
+    resolver: yupResolver(validationSchema)
+  });
+
   const [inputs, setInputs] = React.useState({ name: "", visibility: "" });
 
   const [createRepo, { loading, error }] = useMutation(CREATE_REPO, {
@@ -25,59 +37,61 @@ const CreateNewRepo = () => {
     }));
   };
 
-  function handleCreateRepo(event) {
-    event.preventDefault();
+  const handleCreateRepo = (event) => {
+    // console.log(typeof inputs.visibility)
+    // event.preventDefault();
     createRepo({
-      variables: {
-        name: inputs.name,
-        // description: inputs.description,
-        visibility: inputs.visibility,
-      },
+      variables: inputs,
       refetchQueries: [{ query: GET_REPOSITORIES }],
     });
-    setInputs('')
-  }
+    setInputs("");
+  };
+
+  // const handleCreateRepo = useCallback((event) => {
+  //   event.preventDefault();
+  //   createRepo({
+  //     variables: inputs,
+  //     refetchQueries: [{ query: GET_REPOSITORIES }],
+  //   });
+  // }, []);
 
   return (
     <div>
-      <form onSubmit={handleCreateRepo}>
+      <form onSubmit={handleSubmit(handleCreateRepo)}>
         <div className="form-group col-6">
           <label>Repository name</label>
           <input
-            className="form-control"
             type="text"
             name="name"
             onChange={handleInputChange}
             value={inputs.name}
-          ></input>
+            ref={register}
+            className={`form-control ${errors.name ? "is-invalid" : ""}`}
+          />
+          <div className="invalid-feedback">{errors.name?.message}</div>
         </div>
-        {/* <div className="form-group col-6">
-          <label>Description</label>
-          <textarea
-            className="form-control"
-            type="number"
-            name="description"
-            onChange={handleInputChange}
-            value={inputs.description}
-          ></textarea>
-        </div>*/}
         <div className="form-group col-6">
           <label>Visibility:</label>
           <select
-            className="form-control"
+          type="text"
             name="visibility"
             onChange={handleInputChange}
             value={inputs.visibility}
+            ref={register}
+            className={`form-control ${errors.visibility ? "is-invalid" : ""}`}
           >
             <option>Select visibility</option>
             <option>PRIVATE</option>
             <option>PUBLIC</option>
           </select>
+          <div className="invalid-feedback">{errors.visibility?.message}</div>
         </div>
-        <button className="btn btn-primary">New Repo</button>
+        <button type="submit" className="btn btn-primary">
+          New Repo
+        </button>
       </form>
     </div>
   );
-}
+};
 
 export default CreateNewRepo;
