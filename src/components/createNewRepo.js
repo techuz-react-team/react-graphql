@@ -12,7 +12,7 @@ const CreateNewRepo = () => {
   });
 
   const { register, handleSubmit, errors } = useForm({
-    resolver: yupResolver(validationSchema)
+    resolver: yupResolver(validationSchema),
   });
 
   const [inputs, setInputs] = React.useState({ name: "", visibility: "" });
@@ -73,16 +73,15 @@ const CreateNewRepo = () => {
         <div className="form-group col-6">
           <label>Visibility:</label>
           <select
-          type="text"
             name="visibility"
             onChange={handleInputChange}
             value={inputs.visibility}
             ref={register}
             className={`form-control ${errors.visibility ? "is-invalid" : ""}`}
           >
-            <option>Select visibility</option>
-            <option>PRIVATE</option>
-            <option>PUBLIC</option>
+            <option value="">Select visibility</option>
+            <option value="PRIVATE">PRIVATE</option>
+            <option value="PUBLIC">PUBLIC</option>
           </select>
           <div className="invalid-feedback">{errors.visibility?.message}</div>
         </div>
