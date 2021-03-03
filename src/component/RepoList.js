@@ -3,7 +3,6 @@ import {GET_ALL_REPO} from '../queries/queries'
 import {useQuery} from "@apollo/react-hooks";
 
 const RepoList = () => {
-    console.log('Called')
     const {data, loading, error} = useQuery(GET_ALL_REPO);
     const repoList = data?.viewer?.repositories.nodes;
     
