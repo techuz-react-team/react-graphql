@@ -13,16 +13,15 @@ const Header = () => {
     
     if(data) {
         return(
-            <div>
-                <nav>
+            <nav>
                 <section>
                     <h4 className="center">React Graphql demo</h4>
     
                     <div className="navContent">
                     <div className="navLinks">
                     <div className="navbar">
-                        <span className="float-left white mr20px" >Username : {data.viewer.login}</span>
-                        <span className="float-left white mr20px" >Email : {data.viewer.email}</span>
+                        <span className="float-left white mr20px" >Username : {data?.viewer?.login}</span>
+                        <span className="float-left white mr20px" >Email : {data?.viewer?.email}</span>
                         
                         <Link className="btn btn-success float-right mr20px" to="/add-repo">Create Repo</Link>
                         
@@ -30,8 +29,7 @@ const Header = () => {
                     </div>
                     </div>
                 </section>
-                </nav>
-            </div>
+            </nav>
         )
     }
     

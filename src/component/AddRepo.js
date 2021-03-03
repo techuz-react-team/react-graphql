@@ -1,57 +1,34 @@
-import React, { useState, useEffect  } from 'react';
+import React from 'react';
 import { useMutation } from "@apollo/client";
-
 import { Link } from 'react-router-dom'
 import { ADD_REPO,GET_ALL_REPO } from "../queries/queries";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const AddRepo = () => {
-    let initialValues={name:"", visibility:""}
-
-    const [input, setInput] = useState(initialValues) //Set input
-    const [formErrors, setFormErrors] = useState({}); //Set form error variable
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [addRepo, { data, loading, error }] = useMutation(ADD_REPO,{
         refetchQueries:[{query:GET_ALL_REPO}]
     }); //Define Mutation to call API
     
-    //Handle input change event
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setInput({ ...input, [name]: value });
-    };
-
-    const submit = () =>{
-        addRepo({ variables: input }); // API call from here
-        setInput(initialValues) // Reset form
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setFormErrors(validate(input)); // Validate form
-        setIsSubmitting(true);
-    } 
-
-
-    //form validation handler
-    const validate = (values) => {
-        let errors = {};
-        
-        if (!values.name) {
-        errors.name = "Name cannot be blank";
-        } 
-
-        if (!values.visibility) {
-            errors.visibility = "Please select visibility";
-        } 
-        return errors;
-    };
-
-    //Handle with the form correction
-    useEffect(() => {
-        if (Object.keys(formErrors).length === 0 && isSubmitting) {
-          submit();
-        }
-      }, [formErrors,isSubmitting]);
+    const formik = useFormik({
+        initialValues: {
+          name: "",
+          visibility: "",
+        },
+        validationSchema: Yup.object({
+            name: Yup.string()
+              .min(2, "Mininum 2 characters")
+              .max(200, "Maximum 200 characters")
+              .required("Please enter name!"),
+            visibility: Yup.string()
+              .required("Please select visibility!"),
+          }),
+          onSubmit: (values, {resetForm}) => {
+            //alert(JSON.stringify(values, null, 2));
+            addRepo({ variables: values }); // API call from here 
+            resetForm(); 
+          }
+      });
 
     return (
         <div>
@@ -62,44 +39,46 @@ const AddRepo = () => {
 
             {error && (<span className="error-msg">Something went wrong!.</span>)}
 
-            {Object.keys(formErrors).length === 0 && data && isSubmitting && (
+            { data  && (
                 <span className="success-msg">Repo Created Successfully</span>
             )}
+            
             <Link className="btn btn-success float-right mr20px" to="/">Back To List</Link>
             </section>
 
             <section>
-            <form className="mr20px col-md-6" noValidate onSubmit={handleSubmit}>
+            <form className="mr20px col-md-6" onSubmit={formik.handleSubmit}>
             <div className="form-group ">
                 <label >Name</label>
-                <input type="text" 
-                className={formErrors.name ? "input-error form-control " : 'form-control '}
-                onChange={handleChange} 
-                name="name" 
-                value={input.name}  
+                <input 
+                type="text" 
+                name="name"
+                className={`form-control ${formik.errors.name && formik.touched.name ? 'input-error': ' '}`}
+                value={formik.values.name} 
+                onChange={formik.handleChange} 
                 placeholder="Enter Name" />
-
-            {formErrors.name && (
-                <span className="error">{formErrors.name}</span>
+            
+            {formik.errors.name && formik.touched.name && (
+                <span className="error">{formik.errors.name}</span>
             )}
+            
             </div>
 
             <div className="form-group">
                 <label>Visibility:</label>
                 <select
+                    className={`form-control ${formik.errors.visibility && formik.touched.visibility ? 'input-error': ' '}`}
                     name="visibility"
-                    className={formErrors.visibility ? "input-error form-control " : 'form-control '}
-                    value={input.visibility}
-                    onChange={handleChange}
-                   
+                    value={formik.values.visibility}
+                    onChange={formik.handleChange} 
                 >
                     <option value="">Select visibility</option>
                     <option value="PRIVATE">PRIVATE</option>
                     <option value="PUBLIC">PUBLIC</option>
                 </select>
-                {formErrors.visibility && (
-                <span className="error">{formErrors.visibility}</span>
-                    )}
+                {formik.errors.visibility && formik.touched.visibility && (
+                    <span className="error">{formik.errors.visibility}</span>
+                )}
                 </div>
 
             <button type="submit" className="btn btn-primary">Add</button>
